@@ -1,4 +1,4 @@
-#User Images
+# User Images
 
 This is a Flask project designed to practice working with Flask, PostgreSQL, MongoDB, Docker, and OpenCV.
 
