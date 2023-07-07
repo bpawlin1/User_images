@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Photo{% endblock %}
+
+{% block content %}
+    <h1>Add Photo</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label for="photo_name">Photo Name:</label>
+        <input type="text" id="photo_name" name="photo_name"><br><br>
+        <label for="photo_file">Photo File:</label>
+        <input type="file" id="photo_file" name="photo_file" onchange="handleImageUpload()"><br><br>
+        <label for="x">X:</label>
+        <input type="text" id="x" name="x"><br><br>
+        <label for="y">Y:</label>
+        <input type="text" id="y" name="y"><br><br>
+        <label for="width">Width:</label>
+        <input type="text" id="width" name="width"><br><br>
+        <label for="height">Height:</label>
+        <input type="text" id="height" name="height"><br><br>
+        <input type="submit" value="Add Photo">
+    </form>
+
+    <h2>Preview</h2>
+    <div style="position: relative;">
+        <canvas id="canvas"></canvas>
+        <button onclick="drawRectangle()">Draw Rectangle</button>
+        <button onclick="clearRectangle()">Clear Rectangle</button>
+    </div>
+
+    <script>
+        let image;
+        let rectangle = { x: 0, y: 0, width: 0, height: 0 };
+        let isRectangleDrawn = false;
+
+        function handleImageUpload() {
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            const previewImage = document.getElementById('photo_file').files[0];
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                image = new Image();
+                image.onload = function() {
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.drawImage(image, 0, 0);
+
+                    if (isRectangleDrawn) {
+                        drawRectangle();
+                    }
+
+                    // Populate the width and height fields with image dimensions
+                    document.getElementById('width').value = image.width;
+                    document.getElementById('height').value = image.height;
+                };
+                image.src = event.target.result;
+            };
+
+            reader.readAsDataURL(previewImage);
+        }
+
+        function drawRectangle() {
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+
+            const { x, y, width, height } = rectangle;
+            context.strokeStyle = 'red';
+            context.lineWidth = 3;
+            context.beginPath();
+            context.rect(x, y, width, height);
+            context.stroke();
+
+            // Populate the form fields with rectangle coordinates
+            document.getElementById('x').value = x;
+            document.getElementById('y').value = y;
+        }
+
+        function clearRectangle() {
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+
+            // Clear the entire canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Redraw the image
+            context.drawImage(image, 0, 0);
+
+            // Reset the rectangle data
+            rectangle = { x: 0, y: 0, width: 0, height: 0 };
+
+            // Clear the form fields
+            document.getElementById('x').value = '';
+            document.getElementById('y').value = '';
+            document.getElementById('width').value = '';
+            document.getElementById('height').value = '';
+
+            isRectangleDrawn = false;
+        }
+
+        function setRectangle(event) {
+            if (!image) return;
+
+            const rect = event.target.getBoundingClientRect();
+            const scaleX = image.width / rect.width;
+            const scaleY = image.height / rect.height;
+
+            rectangle.x = Math.round((event.clientX - rect.left) * scaleX);
+            rectangle.y = Math.round((event.clientY - rect.top) * scaleY);
+            rectangle.width = parseInt(document.getElementById('width').value);
+            rectangle.height = parseInt(document.getElementById('height').value);
+
+            drawRectangle();
+            isRectangleDrawn = true;
+        }
+
+        const canvas = document.getElementById('canvas');
+        canvas.addEventListener('click', setRectangle);
+    </script>
+{% endblock %}

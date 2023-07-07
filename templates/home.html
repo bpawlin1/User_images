@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+    <h1>Welcome to the Home Page, {{ username }}</h1>
+    
+    <a href="/photos/add"><button>Add Photo</button></a>
+    
+    {% for photo in photos %}
+        <div class="photo-container">
+            <h3>{{ photo.photo_name }}</h3>
+            <img src="{{ url_for('get_photo', photo_id=photo._id) }}" alt="{{ photo.photo_name }}" class="photo">
+            <form action="{{ url_for('delete_photo', photo_id=photo._id) }}" method="POST">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+    {% endfor %}
+{% endblock %}
+
